@@ -22,10 +22,7 @@ import {
   isV2AllocationRequest,
 } from '../contexts/WalletServiceContext';
 import { useMutation } from '@tanstack/react-query';
-import {
-  AllocateAmuletRequest,
-  AllocateAmuletV2Request,
-} from '@canton-network/wallet-openapi';
+import { AllocateAmuletRequest, AllocateAmuletV2Request } from '@canton-network/wallet-openapi';
 import {
   AllocationSpecification as AllocationSpecificationV2,
   SettlementInfo,

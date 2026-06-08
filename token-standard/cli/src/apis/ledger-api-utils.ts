@@ -145,7 +145,7 @@ export function ensureInterfaceViewIsPresent(
   return interfaceView;
 }
 
-type Meta = { values: { [key: string]: string } } | undefined;
+export type Meta = { values: { [key: string]: string } } | undefined;
 
 export function mergeMetas(event: LedgerApiExercisedEvent): Meta {
   const lastWriteWins = [
