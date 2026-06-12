@@ -7,3 +7,10 @@
 
 .. release-notes:: Upcoming
 
+  - Deployment
+
+      - Helm Charts
+
+          - All Helm charts now support overriding full image names.
+            It is possible to override the default image names using new Helm values.
+            This change helps deployments that require specific naming conventions for images.
