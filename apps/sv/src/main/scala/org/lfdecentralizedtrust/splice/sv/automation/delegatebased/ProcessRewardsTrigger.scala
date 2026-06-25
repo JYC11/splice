@@ -3,11 +3,9 @@
 
 package org.lfdecentralizedtrust.splice.sv.automation.delegatebased
 
-import org.apache.pekko.NotUsed
 import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.scaladsl.Source
 import org.lfdecentralizedtrust.splice.automation.{
-  OnAssignedContractTrigger,
+  PollingParallelTaskExecutionTrigger,
   TaskOutcome,
   TaskSuccess,
   TriggerContext,
@@ -58,13 +56,7 @@ private[delegatebased] abstract class ProcessRewardsTriggerBase(
     ec: ExecutionContextExecutor,
     mat: Materializer,
     tracer: Tracer,
-) extends OnAssignedContractTrigger.Template[
-      ProcessRewardsV2.ContractId,
-      ProcessRewardsV2,
-    ](
-      svTaskContext.dsoStore,
-      ProcessRewardsV2.COMPANION,
-    )
+) extends PollingParallelTaskExecutionTrigger[ProcessRewardsV2Contract]
     with SvTaskBasedTrigger[ProcessRewardsV2Contract] {
 
   private val store = svTaskContext.dsoStore
@@ -72,10 +64,15 @@ private[delegatebased] abstract class ProcessRewardsTriggerBase(
 
   override def extraMetricLabels: Seq[(String, String)] = Seq("dryRun" -> isDryRun.toString)
 
-  override protected def source(implicit
-      traceContext: TraceContext
-  ): Source[ProcessRewardsV2Contract, NotUsed] =
-    super.source.filter(_.payload.dryRun == isDryRun)
+  override protected def retrieveTasks()(implicit
+      tc: TraceContext
+  ): Future[Seq[ProcessRewardsV2Contract]] =
+    store.listProcessRewardsV2().map(_.filter(_.payload.dryRun == isDryRun))
+
+  override protected def isStaleTask(
+      task: ProcessRewardsV2Contract
+  )(implicit tc: TraceContext): Future[Boolean] =
+    store.multiDomainAcsStore.containsArchived(Seq(task.contractId))
 
   override def completeTaskAsDsoDelegate(
       task: ProcessRewardsV2Contract,
