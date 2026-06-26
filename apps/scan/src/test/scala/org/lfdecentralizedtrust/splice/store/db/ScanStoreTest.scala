@@ -1949,6 +1949,22 @@ class DbScanStoreTest
         result should not contain charlesValidatorLicense
       }
     }
+
+    "return an empty result when given no validators" in {
+      val alice = userParty(443)
+      val aliceValidatorLicense = validatorLicense(
+        alice,
+        dsoParty,
+        Some(new FaucetState(new Round(0), new Round(1000L), 0L))
+      )
+      for {
+        store <- mkStore()
+        _ <- dummyDomain.create(aliceValidatorLicense)(store.multiDomainAcsStore)
+        result <- store.getValidatorLicenseByValidator(Vector.empty)
+      } yield {
+        result shouldBe empty
+      }
+    }
   }
   "Changing the acsStoreDescriptorUserVersion" should {
     val alice = userParty(443)

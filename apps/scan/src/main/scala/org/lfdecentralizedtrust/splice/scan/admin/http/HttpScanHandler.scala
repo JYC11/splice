@@ -2428,16 +2428,23 @@ class HttpScanHandler(
   ): Future[ScanResource.GetValidatorFaucetsByValidatorResponse] = {
     implicit val tc = extracted
     withSpan(s"$workflowId.getValidatorFaucetsByValidator") { _ => _ =>
-      store
-        .getValidatorLicenseByValidator(validators.map(v => PartyId.tryFromProtoPrimitive(v)))
-        .map(licenses =>
-          ScanResource.GetValidatorFaucetsByValidatorResponse.OK(
-            definitions
-              .GetValidatorFaucetsByValidatorResponse(
-                FaucetProcessor.process(licenses)
-              )
-          )
+      if (validators.isEmpty) {
+        Future.successful(
+          ScanResource.GetValidatorFaucetsByValidatorResponse
+            .BadRequest(definitions.ErrorResponse("validator_ids must not be empty"))
         )
+      } else {
+        store
+          .getValidatorLicenseByValidator(validators.map(v => PartyId.tryFromProtoPrimitive(v)))
+          .map(licenses =>
+            ScanResource.GetValidatorFaucetsByValidatorResponse.OK(
+              definitions
+                .GetValidatorFaucetsByValidatorResponse(
+                  FaucetProcessor.process(licenses)
+                )
+            )
+          )
+      }
     }
   }
 
