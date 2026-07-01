@@ -54,7 +54,7 @@ class AcsSnapshotStore(
   import profile.api.jdbcActionExtensionMethods
 
   private implicit def rowsAlteredByIdempotencyCheck[A](implicit
-    row: DbStorage.RowsAltered[A]
+      row: DbStorage.RowsAltered[A]
   ): DbStorage.RowsAltered[Option[A]] = _.exists(row(_))
 
   private def historyId = updateHistory.historyId
